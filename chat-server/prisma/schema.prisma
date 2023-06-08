@@ -10,8 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 model textChannel {
   id        Int      @id @default(autoincrement())
   name      String
   text      String
+  channelId Int       @default(-1)
+  channel   Channel  @relation(fields: [channelId], references: [id])
+}
+
+model ChannelUser {
+  id              Int      @id @default(autoincrement())
+  clientId        String
+  Name            String   @default("unknown")
+  channels        Channel[]
+}
+
+model Channel {
+  id               Int      @id @default(autoincrement())
+  ChannelName      String
+  password         String
+  owner            String
+  users            ChannelUser[]
+  textChannels     textChannel[]
 }

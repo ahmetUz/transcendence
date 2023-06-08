@@ -9,12 +9,16 @@ const messageText = ref('');
 const joined = ref(false);
 const name = ref('');
 const typingDisplay = ref('');
+const chatName = ref('');
+const password = ref('');
+const createChatName = ref('');
+const createChatPassword = ref('');
 
 
 onBeforeMount( () => {
-  socket.emit('findAllMessages', {}, (response) => {
-    messages.value = response;
-  });
+  // socket.emit('findAllChannelMessages', {chatName: chatName.value, password: password.value}, (response) => {
+  //   messages.value = response;
+  // });
 
   socket.on('message', (message) => {
     messages.value.push(message);
@@ -30,13 +34,25 @@ onBeforeMount( () => {
 });
 
 const join = () => {
-  socket.emit('join', { name: name.value}, () => {
+  console.log("try to join");
+  socket.emit('join', { name: name.value, chatName: chatName.value, password: password.value}, () => {
     joined.value = true;
+    console.log("joined");
   })
+
+  socket.emit('findAllChannelMessages', {chatName: chatName.value, password: password.value}, (response) => {
+    messages.value = response;
+  });
 }
 
+const createChannel = () => {
+  socket.emit('createChannel', { name: name.value, createChatName: createChatName.value, createChatPassword: createChatPassword.value}, () => {
+  });
+};
+
+
 const sendMessage = () => {
-  socket.emit('createMessage', { text: messageText.value}, () => {
+  socket.emit('createMessageChannel', { text: messageText.value, chatName: chatName.value, password: password.value}, () => {
     messageText.value = '';
   })
 
@@ -59,7 +75,18 @@ const emitTyping = () => {
       <form @submit.prevent="join">
         <label>What's your name?</label>
         <input v-model="name"/>
-        <button type="submit">Send</button>
+        <label>Chat name:</label>
+        <input v-model="chatName" />
+        <label>Chat password:</label>
+        <input v-model="password" type="password" />
+        <button type="submit">join room</button>
+      </form>
+      <form @submit.prevent="createChannel">
+        <label>Create a channel (name) :</label>
+        <input v-model="createChatName" />
+        <label>Create a channel (pass) :</label>
+        <input v-model="createChatPassword" type="password"/>
+        <button type="submit">Create room</button>
       </form>
     </div>
     <div class="chat-container" v-else>
@@ -97,8 +124,50 @@ const emitTyping = () => {
   height: 100%;
 }
 
-.messages-container{
+.messages-container {
   flex: 1;
+}
+
+.join-section, .create-section {
+  margin-bottom: 20px;
+}
+
+.name-input {
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 5px;
+}
+
+input[type="text"], input[type="password"] {
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  margin-top: 10px;
 }
 
 </style>
