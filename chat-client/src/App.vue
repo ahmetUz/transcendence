@@ -35,15 +35,23 @@ onBeforeMount( () => {
 
 const join = () => {
   console.log("try to join");
-  socket.emit('join', { name: name.value, chatName: chatName.value, password: password.value}, () => {
+  socket.emit('join', { name: name.value, chatName: chatName.value, password: password.value }, () => {
     joined.value = true;
     console.log("joined");
-  })
 
-  socket.emit('findAllChannelMessages', {chatName: chatName.value, password: password.value}, (response) => {
-    messages.value = response;
+    // Utilisation d'une promesse pour attendre que l'événement 'join' soit terminé
+    const joinPromise = new Promise((resolve) => {
+      resolve();
+    });
+
+    joinPromise.then(() => {
+      socket.emit('findAllChannelMessages', { chatName: chatName.value, password: password.value }, (response) => {
+        messages.value = response;
+      });
+    });
   });
-}
+};
+
 
 const createChannel = () => {
   socket.emit('createChannel', { name: name.value, createChatName: createChatName.value, createChatPassword: createChatPassword.value}, () => {
@@ -60,10 +68,10 @@ const sendMessage = () => {
 
 let timeout;
 const emitTyping = () => {
-  socket.emit('typing', {isTyping: true});
+  socket.emit('typing', {isTyping: true, chatName: chatName.value, password: password.value});
 
   timeout = setTimeout( () => {
-    socket.emit('typing', {isTyping: false});
+    socket.emit('typing', {isTyping: false, chatName: chatName.value, password: password.value});
   }, 2000);
 }
 

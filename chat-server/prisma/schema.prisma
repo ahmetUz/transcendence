@@ -16,14 +16,32 @@ model textChannel {
   id        Int      @id @default(autoincrement())
   name      String
   text      String
-  channelId Int       @default(-1)
-  channel   Channel  @relation(fields: [channelId], references: [id])
+  channelUserId     Int          @default(-1)
+  channelUser       ChannelUser  @relation("user", fields: [channelUserId], references: [id])
+  channelId         Int          @default(-1)
+  channel           Channel      @relation("channel", fields: [channelId], references: [id])
 }
+
+model block {
+  id                Int          @id @default(autoincrement())
+  blockedUserId     Int
+  blockerUserId     Int
+  blockerChannelUserId  Int @default(-1)
+  blockedChannelUserId  Int @default(-1)
+  blockedBy         ChannelUser  @relation("BlockedByRelation", fields: [blockerChannelUserId], references: [id])
+  blockedUser       ChannelUser  @relation("BlockedUserRelation", fields: [blockedChannelUserId], references: [id])
+}
+
+
 
 model ChannelUser {
   id              Int      @id @default(autoincrement())
   clientId        String
   Name            String   @default("unknown")
+  muted           Boolean  @default(false)
+  blockedBy       block[]    @relation("BlockedByRelation")
+  blockedUser     block[]    @relation("BlockedUserRelation")
+  texts           textChannel[] @relation("user")
   channels        Channel[]
 }
 
@@ -31,7 +49,7 @@ model Channel {
   id               Int      @id @default(autoincrement())
   ChannelName      String
   password         String
-  owner            String
+  ownerId          String     @default("")
   users            ChannelUser[]
-  textChannels     textChannel[]
+  textChannels     textChannel[] @relation("channel")
 }
