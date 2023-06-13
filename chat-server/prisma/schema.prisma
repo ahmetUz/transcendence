@@ -38,18 +38,29 @@ model ChannelUser {
   id              Int      @id @default(autoincrement())
   clientId        String
   Name            String   @default("unknown")
+  status          String   @default("user")
+
+  //punishment
   muted           Boolean  @default(false)
+  kicked          Boolean  @default(false)
+  banned          Boolean  @default(false)
+  //punishment duration
+  muteExpiration DateTime?
+  kickExpiration DateTime?
+  banExpiration DateTime?
+
   blockedBy       block[]    @relation("BlockedByRelation")
   blockedUser     block[]    @relation("BlockedUserRelation")
   texts           textChannel[] @relation("user")
-  channels        Channel[]
+  channelId      Int        @default(-1)
+  channel        Channel    @relation(fields: [channelId], references: [id])
 }
 
 model Channel {
-  id               Int      @id @default(autoincrement())
+  id               Int      @id  @default(autoincrement())
+  status           String        @default("public")
   ChannelName      String
-  password         String
-  ownerId          String     @default("")
+  password         String        @default("")
   users            ChannelUser[]
   textChannels     textChannel[] @relation("channel")
 }
